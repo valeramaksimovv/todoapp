@@ -96,7 +96,10 @@ Any team member can create cards. Only an **Admin** can delete cards.
   - `In progress`
   - `Review`
   - `Done`
-- `card_priority`
+- `card_priority` — enum:
+  - `Higth`
+  - `Normal`
+  - `Low`
 - `card_time_create`
 - `card_last_update`
 - `card_create_by`
