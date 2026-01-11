@@ -6,7 +6,7 @@ from django.db import models
 class Card(models.Model):
     class Status(models.TextChoices):
         BACKLOG = "BACKLOG", "Backlog"
-        TO DO = "TODO", "To Do"
+        TODO = "TODO", "To Do"
         IN_PROGRESS = "IN_PROGRESS", "In Progress"
         REVIEW = "REVIEW", "Reviev"
         DONE = "DONE", "Done"
@@ -22,13 +22,13 @@ class Card(models.Model):
 # status card, BACKLOG default status
     status = models.CharField(
         max_length=20,
-        choices=Status.choises,
+        choices=Status.choices,
         default=Status.BACKLOG,
     )
 
 # priority card, MEDIUM default priority
     priorityriority = models.CharField(
-        max_lenght=10,
+        max_length=10,
         choices=Priority.choices,
         default=Priority.MEDIUM,
     )
@@ -53,8 +53,8 @@ class Card(models.Model):
     description = models.TextField(blank=True)
 
 # create and update time
-    create_at = models.DataTimeField(auto_now_add=True)
-    update_at = models.DataTimeField(auto_now=True)
+    create_at = models.DateTimeField(auto_now_add=True)
+    update_at = models.DateTimeField(auto_now=True)
 
 # create by
     create_by = models.ForeignKey(
