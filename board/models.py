@@ -20,17 +20,17 @@ class Card(models.Model):
     name = models.CharField(max_length=250)
 
 # status card, BACKLOG default status
-    Status = models.CharField(
+    status = models.CharField(
         max_length=20,
         choices=Status.choises,
-        default=Status.BACKLOG
+        default=Status.BACKLOG,
     )
 
 # priority card, MEDIUM default priority
-    Priority = models.CharField(
+    priorityriority = models.CharField(
         max_lenght=10,
-        choices=Priority.choices
-        default=Priority.MEDIUM
+        choices=Priority.choices,
+        default=Priority.MEDIUM,
     )
 
 # assign card
@@ -70,5 +70,5 @@ class Card(models.Model):
         related_name="updated_cards",
     )
 
-def __str__(self) -> str:
-    return self.name
+    def __str__(self) -> str:
+        return self.name
