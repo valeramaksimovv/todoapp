@@ -8,7 +8,7 @@ class Card(models.Model):
         BACKLOG = "BACKLOG", "Backlog"
         TODO = "TODO", "To Do"
         IN_PROGRESS = "IN_PROGRESS", "In Progress"
-        REVIEW = "REVIEW", "Reviev"
+        REVIEW = "REVIEW", "Review"
         DONE = "DONE", "Done"
 
     class Priority(models.TextChoices):
@@ -27,14 +27,14 @@ class Card(models.Model):
     )
 
 # priority card, MEDIUM default priority
-    priorityriority = models.CharField(
+    priority = models.CharField(
         max_length=10,
         choices=Priority.choices,
         default=Priority.MEDIUM,
     )
 
 # assign card
-    assigne = models.ForeignKey(
+    assignee = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         null=True,
         blank=True,
@@ -45,7 +45,7 @@ class Card(models.Model):
 # reported card
     reporter = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name="reported_cards",
     )
 
@@ -53,18 +53,18 @@ class Card(models.Model):
     description = models.TextField(blank=True)
 
 # create and update time
-    create_at = models.DateTimeField(auto_now_add=True)
-    update_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
 # create by
-    create_by = models.ForeignKey(
+    created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name="created_cards",
     )
 
 # last update by
-    last_update_by = models.ForeignKey(
+    last_updated_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
         related_name="updated_cards",

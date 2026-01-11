@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Board</h1>
+
+<div style="display: flex; gap: 16px; align-items: flex-start;">
+    {% for col in columns %}
+    <div style="width: 220px; border: 1px solid #ddd; padding: 10px;">
+        <h3>{{ col.label }}</h3>
+
+        {% if col.cards %}
+        <ul style="padding-left: 16px;">
+            {% for card in col.cards %}
+            <li>
+                <a href="{% url 'card_detail' card.pk %}">
+                    {{ card.name }}
+                </a>
+                <div style="font-size: 12px; opacity: 0.7;">
+                    Priority: {{ card.priority }}
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p style="opacity: 0.6;">No cards</p>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
