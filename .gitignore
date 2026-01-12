@@ -1,6 +1,0 @@
-.gitignore
-/.gitignore
-.venv
-.env
-__pycache__
-migrations
