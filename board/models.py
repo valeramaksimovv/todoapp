@@ -72,3 +72,26 @@ class Card(models.Model):
 
     def __str__(self) -> str:
         return self.name
+
+
+# Comment
+
+class Comment(models.Model):
+    card = models.ForeignKey(
+        Card,
+        on_delete=models.CASCADE,
+        related_name="comments",
+    )
+    text = models.TextField()
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="comments",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self) -> str:
+        return f"Comment by {self.created_by} on {self.card}"
+
+
+

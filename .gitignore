@@ -4,4 +4,3 @@
 .env
 __pycache__
 migrations
-0001_initial.py
