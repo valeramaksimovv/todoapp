@@ -3,6 +3,9 @@
 {% block content %}
 <h1>Board</h1>
 
+!-- create new card button --
+<p><a href="{% url 'card_create' %}">+ New card</a></p>
+
 <div style="display: flex; gap: 16px; align-items: flex-start;">
     {% for col in columns %}
     <div style="width: 220px; border: 1px solid #ddd; padding: 10px;">
