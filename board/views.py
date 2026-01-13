@@ -3,7 +3,7 @@ from collections import defaultdict
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect
-from .forms import CardForm, CommentForm
+from .forms import CardForm, CommentForm, AttachmentForm
 
 from .models import Card
 
@@ -28,32 +28,53 @@ def board_view(request):
 def card_detail_view(request, pk: int):
     card = get_object_or_404(
         Card.objects.select_related("assignee", "reporter", "created_by", "last_updated_by"),
-        pk=pk
+        pk=pk,
     )
 
+    comment_form = CommentForm()
+    attachment_form = AttachmentForm()
+
     if request.method == "POST":
-        form = CommentForm(request.POST)
-        if form.is_valid():
-            comment = form.save(commit=False)
-            comment.card = card
-            comment.created_by = request.user
-            comment.save()
-            return redirect("card_detail", pk=card.pk)
-    else:
-        form = CommentForm()
+        # add comment
+        if "add_comment" in request.POST:
+            comment_form = CommentForm(request.POST)
+            if comment_form.is_valid():
+                comment = comment_form.save(commit=False)
+                comment.card = card
+                comment.created_by = request.user
+                comment.save()
+                return redirect("card_detail", pk=card.pk)
+
+        # add attachment
+        elif "add_attachment" in request.POST:
+            attachment_form = AttachmentForm(request.POST, request.FILES)
+            if attachment_form.is_valid():
+                att = attachment_form.save(commit=False)
+                att.card = card
+                att.uploaded_by = request.user
+                att.save()
+                return redirect("card_detail", pk=card.pk)
 
     comments = card.comments.select_related("created_by").order_by("created_at")
+    attachments = card.attachments.select_related("uploaded_by").order_by("-uploaded_at")
 
     return render(
         request,
         "board/card_detail.html",
-        {"card": card, "comments": comments, "form": form}
-        )
+        {
+            "card": card,
+            "comments": comments,
+            "attachments": attachments,
+            "comment_form": comment_form,
+            "attachment_form": attachment_form,
+        },
+    )
+
 
 @login_required
 def card_create_view(request):
     if request.method == "POST":
-        form = CardCreateForm(request.POST)
+        form = CardForm(request.POST)
         if form.is_valid():
             card = form.save(commit=False)
 
@@ -63,9 +84,8 @@ def card_create_view(request):
 
             card.save()
             return redirect("board")
-
     else:
-        form = CardCreateForm()
+        form = CardForm()
 
     return render(request, "board/card_form.html", {"form": form})
 

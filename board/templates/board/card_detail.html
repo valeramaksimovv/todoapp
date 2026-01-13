@@ -19,8 +19,39 @@
     <li>Updated: {{ card.updated_at }}</li>
 </ul>
 
+<!-- Description block -->
+
 <h3>Description</h3>
 <p>{{ card.description|linebreaksbr|default:"No description" }}</p>
+
+<!-- Attachents block -->
+
+<h3>Attachments</h3>
+
+{% if attachments %}
+<ul>
+    {% for a in attachments %}
+    <li>
+        <a href="{{ a.file.url }}" target="_blank">{{ a.file.name }}</a>
+        — <small>{{ a.uploaded_by }} ({{ a.uploaded_at }})</small>
+    </li>
+    {% endfor %}
+</ul>
+{% else %}
+<p>No attachments yet.</p>
+{% endif %}
+
+<!-- Upload files block -->
+
+<h4>Upload file</h4>
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ attachment_form.as_p }}
+    <button type="submit" name="add_attachment">Upload</button>
+</form>
+
+
+<!-- Comments block -->
 
 <h3>Comments</h3>
 
@@ -38,11 +69,13 @@
 <p>No comments yet.</p>
 {% endif %}
 
+<!-- Add comments block -->
+
 <h4>Add comment</h4>
 <form method="post">
     {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Add</button>
+    {{ comment_form.as_p }}
+    <button type="submit" name="add_comment">Add</button>
 </form>
 
 {% endblock %}

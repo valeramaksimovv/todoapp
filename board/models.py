@@ -94,4 +94,22 @@ class Comment(models.Model):
         return f"Comment by {self.created_by} on {self.card}"
 
 
+# Attachment fiels
+
+class Attachment(models.Model):
+    card = models.ForeignKey(
+        Card,
+        on_delete=models.CASCADE,
+        related_name="attachments",
+    )
+    file = models.FileField(upload_to="attachments/")
+    uploaded_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="attachemts",
+    )
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self) -> str:
+        return f"Attachment #{self.pk} for card {self.card_id}"
 
