@@ -1,7 +1,10 @@
 <h1>{% if card %}Edit card{% else %}Create card{% endif %}</h1>
 
 <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">{% if card %}Save{% else %}Create{% endif %}</button>
-</form>
+    <form method="post" enctype="multipart/form-data">
+        <label>Attachments (optional)</label>
+        <input type="file" name="files" multiple>
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">{% if card %}Save{% else %}Create{% endif %}</button>
+    </form>

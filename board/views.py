@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect
 from .forms import CardForm, CommentForm, AttachmentForm
 
-from .models import Card
+from .models import Card, Attachment
 
 
 @login_required
@@ -81,9 +81,16 @@ def card_create_view(request):
             card.reporter = request.user
             card.created_by = request.user
             card.last_updated_by = request.user
-
             card.save()
-            return redirect("board")
+
+            for f in request.FILES.getlist("files"):
+                Attachment.objects.create(
+                    card=card,
+                    file=f,
+                    uploaded_by=request.user,
+                )
+
+            return redirect("card_detail", pk=card.pk)
     else:
         form = CardForm()
 
