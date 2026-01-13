@@ -3,7 +3,7 @@ from collections import defaultdict
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect
-from .forms import CardCreateForm, CommentForm
+from .forms import CardForm, CommentForm
 
 from .models import Card
 
@@ -68,3 +68,20 @@ def card_create_view(request):
         form = CardCreateForm()
 
     return render(request, "board/card_form.html", {"form": form})
+
+
+@login_required
+def card_edit_view(request, pk: int):
+    card = get_object_or_404(Card, pk=pk)
+
+    if request.method == "POST":
+        form = CardForm(request.POST, instance=card)
+        if form.is_valid():
+            card = form.save(commit=False)
+            card.last_updated_by = request.user
+            card.save()
+            return redirect("card_detail", pk=card.pk)
+    else:
+        form = CardForm(instance=card)
+
+    return render(request, "board/card_form.html", {"form": form, "card": card})

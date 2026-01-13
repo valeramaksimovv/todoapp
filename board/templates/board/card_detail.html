@@ -5,6 +5,11 @@
 
 <h1>{{ card.name }}</h1>
 
+<p>
+    <a href="{% url 'card_edit' card.pk %}">Edit</a> |
+    <a href="{% url 'board' %}">Back</a>
+</p>
+
 <ul>
     <li>Status: {{ card.get_status_display }}</li>
     <li>Priority: {{ card.get_priority_display }}</li>

@@ -5,4 +5,5 @@ urlpatterns = [
     path("", views.board_view, name="board"),
     path("card/<int:pk>/", views.card_detail_view, name="card_detail"),
     path("cards/new/", views.card_create_view, name="card_create"),
+    path("card/<int:pk>/edit/", views.card_edit_view, name="card_edit"),
 ]
