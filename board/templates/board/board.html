@@ -3,6 +3,13 @@
 {% block content %}
 <h1>Board</h1>
 
+<!-- user list  -->
+{% if request.user.is_staff %}
+<a href="{% url 'users_list' %}">Users</a>
+{% endif %}
+
+
+
 <!-- logout button-->
 
 <form method="post" action="{% url 'logout' %}" style="display:inline;">

@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Users</title>
+</head>
+
+<body>
+    <h1>Users</h1>
+
+    <p><a href="{% url 'board' %}">← Back to board</a></p>
+
+    <table border="1" cellpadding="6">
+        <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Active</th>
+            <th>Action</th>
+        </tr>
+
+        {% for u in users %}
+        <tr>
+            <td>{{ u.id }}</td>
+            <td>{{ u.username }}</td>
+            <td>{{ u.email }}</td>
+            <td>{% if u.is_active %}Yes{% else %}No{% endif %}</td>
+            <td>
+                {% if u.id != request.user.id %}
+                <form method="post" action="{% url 'user_toggle' u.id %}">
+                    {% csrf_token %}
+                    <button type="submit">
+                        {% if u.is_active %}Disable{% else %}Enable{% endif %}
+                    </button>
+                </form>
+                {% else %}
+                —
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+
+</html>

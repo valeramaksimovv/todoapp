@@ -1,10 +1,10 @@
 # Create your views here.
 from collections import defaultdict
-
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import get_user_model
 from django.shortcuts import render, get_object_or_404, redirect
+from django.core.exceptions import PermissionDenied
 from .forms import CardForm, CommentForm, AttachmentForm
-
 from .models import Card, Attachment
 
 
@@ -112,3 +112,34 @@ def card_edit_view(request, pk: int):
         form = CardForm(instance=card)
 
     return render(request, "board/card_form.html", {"form": form, "card": card})
+
+User = get_user_model()
+
+@login_required
+def user_list_view(request):
+    if not request.user.is_staff:
+        raise PermissionDenied
+
+    users = User.objects.order_by("id")
+    return render(request, "board/user_list.html", {"users": users})
+
+
+@login_required
+def user_toggle_active_view(request, pk: int):
+    if not request.user.is_staff:
+        raise PermissionDenied
+    
+    if request.method != "POST":
+        raise PermissionDenied
+
+    u = get_object_or_404(User, pk=pk)
+
+    if u.pk == request.user.pk:
+        return redirect("users_list")
+
+    u.is_active = not u.is_active
+    u.save(update_fields=["is_active"])
+
+    return redirect("users_list")
+
+
