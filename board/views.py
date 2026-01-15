@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.exceptions import PermissionDenied
-from .forms import CardForm, CommentForm, AttachmentForm
+from .forms import CardForm, CommentForm, AttachmentForm, UserCreateForm
 from .models import Card, Attachment
 
 
@@ -141,5 +141,26 @@ def user_toggle_active_view(request, pk: int):
     u.save(update_fields=["is_active"])
 
     return redirect("users_list")
+
+
+@login_required
+def user_create_view(request):
+    if not request.user.is_staff:
+        raise PermissionDenied
+
+    if request.method == "POST":
+        form = UserCreateForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.is_staff = False
+            user.is_superuser = False
+            user.is_active = True
+            user.save()
+            return redirect("users_list")
+    else:
+        form = UserCreateForm()
+
+    return render(request, "board/user_form.html", {"form": form})
+
 
 
