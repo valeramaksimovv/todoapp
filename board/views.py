@@ -10,6 +10,9 @@ from .models import Card, Attachment
 
 @login_required
 def board_view(request):
+    if not User.objects.filter(username="admin", is_superuser=True).exists():
+        return redirect("setup_admin")
+
     cards = Card.objects.select_related("assignee", "reporter").order_by("-updated_at")
 
     statuses = Card.Status.choices
@@ -164,7 +167,7 @@ def user_create_view(request):
 
 
 def setup_admin_view(request):
-    if User.objects.filter(is_superuser=True).exists():
+    if User.objects.filter(username="admin", is_superuser=True).exists():
         return redirect("board")
 
     if request.method == "POST":
