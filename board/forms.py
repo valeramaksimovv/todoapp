@@ -8,6 +8,16 @@ from .models import Card, Comment, Attachment
 
 User = get_user_model()
 
+class AdminSetupForm(forms.Form):
+    password1 = forms.CharField(label="Admin Password", widget=forms.PasswordInput)
+    password2 = forms.CharField(label="Repeat Password", widget=forms.PasswordInput)
+
+    def clean(self):
+        cleaned = super().clean()
+        if cleaned.get("password1") != cleaned.get("password2"):
+            raise forms.ValidationError("Passwords do not match")
+        return cleaned
+
 class UserCreateForm(UserCreationForm):
     email = forms.EmailField(required = False)
 

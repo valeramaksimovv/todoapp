@@ -1,10 +1,10 @@
 # Create your views here.
 from collections import defaultdict
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, login
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.exceptions import PermissionDenied
-from .forms import CardForm, CommentForm, AttachmentForm, UserCreateForm
+from .forms import CardForm, CommentForm, AttachmentForm, UserCreateForm, AdminSetupForm
 from .models import Card, Attachment
 
 
@@ -163,4 +163,24 @@ def user_create_view(request):
     return render(request, "board/user_form.html", {"form": form})
 
 
+def setup_admin_view(request):
+    if User.objects.filter(is_superuser=True).exists():
+        return redirect("board")
+
+    if request.method == "POST":
+        form = AdminSetupForm(request.POST)
+        if form.is_valid():
+            admin_user, _ = User.objects.get_or_create(username="admin")
+            admin_user.is_staff = True
+            admin_user.is_superuser = True
+            admin_user.is_active = True
+            admin_user.set_password(form.cleaned_data["password1"])
+            admin_user.save() 
+
+            login(request, admin_user)
+            return redirect("board")
+    else:
+        form = AdminSetupForm()
+    
+    return render(request, "board/setup_admin.html", {"form": form})
 
