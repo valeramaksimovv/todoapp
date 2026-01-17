@@ -6,6 +6,8 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.core.exceptions import PermissionDenied
 from .forms import CardForm, CommentForm, AttachmentForm, UserCreateForm, AdminSetupForm
 from .models import Card, Attachment
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
 
 
 @login_required
@@ -191,3 +193,20 @@ def setup_admin_view(request):
     
     return render(request, "board/setup_admin.html", {"form": form})
 
+@require_POST
+@login_required
+def card_move_view(request, pk: int):
+    card = get_object_or_404(Card, pk=pk)
+
+    new_status = request.POST.get("status")
+    valid_statuses = {s for s, _ in Card.Status.choices}
+    if new_status not in valid_statuses:
+        return JsonResponse({"ok": False, "error": "Invalid status"}, status = 400)
+
+    card.status = new_status
+    card.last_updated_by = request.user
+    card.save(update_fields=["status", "last_updated_by", "updated_at"])
+
+    return JsonResponse({"ok": True, "status": new_status})
+
+    

@@ -7,6 +7,7 @@ urlpatterns = [
     path("card/<int:pk>/", views.card_detail_view, name="card_detail"),
     path("cards/new/", views.card_create_view, name="card_create"),
     path("card/<int:pk>/edit/", views.card_edit_view, name="card_edit"),
+    path("card/<int:pk>/move/", views.card_move_view, name="card_move"),
     path("users/", views.user_list_view, name="users_list"),
     path("user/<int:pk>/toggle/", views.user_toggle_active_view, name="user_toggle"),
     path("users/new/", views.user_create_view, name="user_create"),

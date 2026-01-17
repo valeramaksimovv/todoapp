@@ -4,10 +4,14 @@
 <head>
     <meta charset="utf-8" />
     <title>TodoApp</title>
+
+    {% block extra_head %}{% endblock %}
 </head>
 
 <body>
     {% block content %}{% endblock %}
+
+    {% block extra_js %}{% endblock %}
 </body>
 
 </html>

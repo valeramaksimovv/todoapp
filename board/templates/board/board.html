@@ -1,13 +1,18 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'board/board.css' %}">
+{% endblock %}
 
 {% block content %}
 <h1>Board</h1>
 
 <!-- user list  -->
+
 {% if request.user.is_staff %}
 <a href="{% url 'users_list' %}">Users</a>
 {% endif %}
-
 
 
 <!-- logout button-->
@@ -18,10 +23,10 @@
 </form>
 
 
-
 <!-- create new card button -->
 
 <p><a href="{% url 'card_create' %}">Create new card</a></p>
+
 
 <!-- "task for me" -->
 
@@ -32,30 +37,85 @@
     </label>
 </form>
 
+
 <!-- body page -->
 
-<div style="display: flex; gap: 16px; align-items: flex-start;">
+<div class="board">
     {% for col in columns %}
-    <div style="width: 220px; border: 1px solid #ddd; padding: 10px;">
+    <div class="column" data-status="{{ col.code }}">
         <h3>{{ col.label }}</h3>
 
-        {% if col.cards %}
-        <ul style="padding-left: 16px;">
+        <div class="cards" data-dropzone="{{ col.code }}">
             {% for card in col.cards %}
-            <li>
-                <a href="{% url 'card_detail' card.pk %}">
-                    {{ card.name }}
-                </a>
-                <div style="font-size: 12px; opacity: 0.7;">
-                    Priority: {{ card.priority }}
-                </div>
-            </li>
+            <div class="card" draggable="true" data-card-id="{{ card.id }}">
+                <a href="{% url 'card_detail' card.id %}">#{{ card.id }} {{ card.name }}</a>
+            </div>
             {% endfor %}
-        </ul>
-        {% else %}
-        <p style="opacity: 0.6;">No cards</p>
-        {% endif %}
+        </div>
     </div>
     {% endfor %}
 </div>
+{% endblock %}
+
+
+<!-- drag&drop script -->
+
+{% block extra_js %}
+<script>
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+        return null;
+    }
+
+    const csrftoken = getCookie("csrftoken");
+
+    let draggedCardId = null;
+    let draggedEl = null;
+
+    document.querySelectorAll(".card[draggable='true']").forEach((el) => {
+        el.addEventListener("dragstart", (e) => {
+            draggedCardId = el.dataset.cardId;
+            draggedEl = el;
+            e.dataTransfer.effectAllowed = "move";
+        });
+    });
+
+    document.querySelectorAll("[data-dropzone]").forEach((zone) => {
+        zone.addEventListener("dragover", (e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = "move";
+        });
+
+        zone.addEventListener("dragenter", () => zone.classList.add("dragover"));
+        zone.addEventListener("dragleave", () => zone.classList.remove("dragover"));
+
+        zone.addEventListener("drop", async (e) => {
+            e.preventDefault();
+            zone.classList.remove("dragover");
+
+            const newStatus = zone.dataset.dropzone;
+            if (!draggedCardId || !draggedEl) return;
+
+            zone.appendChild(draggedEl);
+
+            const url = `/card/${draggedCardId}/move/`;
+            const body = new URLSearchParams({ status: newStatus });
+
+            const resp = await fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "X-CSRFToken": csrftoken,
+                },
+                body: body.toString(),
+            });
+
+            if (!resp.ok) {
+                alert("Failed to move card. Refresh page.");
+            }
+        });
+    });
+</script>
 {% endblock %}
