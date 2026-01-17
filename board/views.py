@@ -13,19 +13,23 @@ def board_view(request):
     if not User.objects.filter(username="admin", is_superuser=True).exists():
         return redirect("setup_admin")
 
-    cards = Card.objects.select_related("assignee", "reporter").order_by("-updated_at")
+    qs = cards = Card.objects.select_related("assignee", "reporter").order_by("-updated_at")
+
+    mine = request.GET.get("mine") == "1"
+    if mine:
+        qs = qs.filter(assignee=request.user)
 
     statuses = Card.Status.choices
 
     grouped = defaultdict(list)
-    for card in cards:
+    for card in qs:
         grouped[card.status].append(card)
 
     columns = []
     for code, label in statuses:
         columns.append({"code": code, "label": label, "cards": grouped.get(code, [])})
         
-    return render(request, "board/board.html", {"columns": columns})
+    return render(request, "board/board.html", {"columns": columns, "mine": mine})
 
 @login_required
 def card_detail_view(request, pk: int):
