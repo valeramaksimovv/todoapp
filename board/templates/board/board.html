@@ -1,44 +1,27 @@
 {% extends "base.html" %}
-{% load static %}
-
-{% block extra_head %}
-<link rel="stylesheet" href="{% static 'board/board.css' %}">
-{% endblock %}
 
 {% block content %}
-<h1>Board</h1>
+<div class="page-head">
+    <div>
+        <h1 class="page-title">Board</h1>
+        <p class="page-subtitle">Manage tasks across statuses.</p>
+    </div>
+    <div class="page-actions">
+        <a class="btn btn-primary" href="{% url 'card_create' %}">Create new card</a>
+    </div>
+</div>
 
-<!-- user list  -->
-
-{% if request.user.is_staff %}
-<a href="{% url 'users_list' %}">Users</a>
-{% endif %}
-
-
-<!-- logout button-->
-
-<form method="post" action="{% url 'logout' %}" style="display:inline;">
-    {% csrf_token %}
-    <button type="submit">Logout</button>
-</form>
-
-
-<!-- create new card button -->
-
-<p><a href="{% url 'card_create' %}">Create new card</a></p>
-
-
-<!-- "task for me" -->
-
-<form method="get" style="margin-bottom: 12px;">
-    <label>
-        <input type="checkbox" name="mine" value="1" {% if mine %}checked{% endif %} onchange="this.form.submit()">
-        Show only my cards
-    </label>
-</form>
-
-
-<!-- body page -->
+<div class="actions-bar">
+    <div class="actions-left">
+        <form method="get">
+            <label style="display:flex; gap:10px; align-items:center; margin:0;">
+                <input type="checkbox" name="mine" value="1" {% if mine %}checked{% endif %}
+                    onchange="this.form.submit()">
+                Show only my cards
+            </label>
+        </form>
+    </div>
+</div>
 
 <div class="board">
     {% for col in columns %}
@@ -48,33 +31,42 @@
         <div class="cards" data-dropzone="{{ col.code }}">
             {% for card in col.cards %}
             <div class="card" draggable="true" data-card-id="{{ card.id }}">
-                <a href="{% url 'card_detail' card.id %}">#{{ card.id }} {{ card.name }}</a>
+                <a class="card-title" href="{% url 'card_detail' card.id %}">
+                    #{{ card.id }} {{ card.name }}
+                </a>
+
+                <div class="card-meta">
+                    <span class="badge badge-priority p-{{ card.priority|lower }}">
+                        {{ card.get_priority_display }}
+                    </span>
+
+                    <span class="assignee">
+                        {% if card.assignee %}
+                        @{{ card.assignee.username }}
+                        {% else %}
+                        Unassigned
+                        {% endif %}
+                    </span>
+                </div>
             </div>
             {% endfor %}
         </div>
     </div>
     {% endfor %}
 </div>
-{% endblock %}
 
-
-<!-- drag&drop script -->
-
-{% block extra_js %}
 <script>
     function getCookie(name) {
         const value = `; ${document.cookie}`;
         const parts = value.split(`; ${name}=`);
         if (parts.length === 2) return parts.pop().split(';').shift();
-        return null;
     }
-
     const csrftoken = getCookie("csrftoken");
 
     let draggedCardId = null;
     let draggedEl = null;
 
-    document.querySelectorAll(".card[draggable='true']").forEach((el) => {
+    document.querySelectorAll(".card[draggable='true']").forEach(el => {
         el.addEventListener("dragstart", (e) => {
             draggedCardId = el.dataset.cardId;
             draggedEl = el;
@@ -82,23 +74,23 @@
         });
     });
 
-    document.querySelectorAll("[data-dropzone]").forEach((zone) => {
+    document.querySelectorAll("[data-dropzone]").forEach(zone => {
         zone.addEventListener("dragover", (e) => {
             e.preventDefault();
+            zone.classList.add("is-over");
             e.dataTransfer.dropEffect = "move";
         });
 
-        zone.addEventListener("dragenter", () => zone.classList.add("dragover"));
-        zone.addEventListener("dragleave", () => zone.classList.remove("dragover"));
+        zone.addEventListener("dragleave", () => {
+            zone.classList.remove("is-over");
+        });
 
         zone.addEventListener("drop", async (e) => {
             e.preventDefault();
-            zone.classList.remove("dragover");
+            zone.classList.remove("is-over");
 
             const newStatus = zone.dataset.dropzone;
-            if (!draggedCardId || !draggedEl) return;
-
-            zone.appendChild(draggedEl);
+            if (draggedEl) zone.appendChild(draggedEl);
 
             const url = `/card/${draggedCardId}/move/`;
             const body = new URLSearchParams({ status: newStatus });
@@ -112,9 +104,7 @@
                 body: body.toString(),
             });
 
-            if (!resp.ok) {
-                alert("Failed to move card. Refresh page.");
-            }
+            if (!resp.ok) alert("Failed to move card. Refresh page.");
         });
     });
 </script>

@@ -1,10 +1,70 @@
-<h1>{% if card %}Edit card{% else %}Create card{% endif %}</h1>
+{% extends "base.html" %}
 
-<form method="post">
-    <form method="post" enctype="multipart/form-data">
-        <label>Attachments (optional)</label>
-        <input type="file" name="files" multiple>
+{% block content %}
+<div class="page-head">
+    <div>
+        <h1 class="page-title">{% if card %}Edit card{% else %}Create card{% endif %}</h1>
+        <p class="page-subtitle">Fill in the details and save.</p>
+    </div>
+    <div class="page-actions">
+        <a class="btn btn-secondary" href="{% url 'board' %}">Back to board</a>
+    </div>
+</div>
+
+<div class="panel">
+    <form method="post" enctype="multipart/form-data" class="form">
         {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">{% if card %}Save{% else %}Create{% endif %}</button>
+
+        {% if form.non_field_errors %}
+        <div class="alert alert-error">
+            {{ form.non_field_errors }}
+        </div>
+        {% endif %}
+
+        <div class="form-grid">
+            <div class="field-row">
+                <label for="{{ form.name.id_for_label }}">Name</label>
+                {{ form.name }}
+                {% if form.name.errors %}{{ form.name.errors }}{% endif %}
+            </div>
+
+            <div class="field-row">
+                <label for="{{ form.status.id_for_label }}">Status</label>
+                {{ form.status }}
+                {% if form.status.errors %}{{ form.status.errors }}{% endif %}
+            </div>
+
+            <div class="field-row">
+                <label for="{{ form.priority.id_for_label }}">Priority</label>
+                {{ form.priority }}
+                {% if form.priority.errors %}{{ form.priority.errors }}{% endif %}
+            </div>
+
+            <div class="field-row">
+                <label for="{{ form.assignee.id_for_label }}">Assignee</label>
+                {{ form.assignee }}
+                {% if form.assignee.errors %}{{ form.assignee.errors }}{% endif %}
+            </div>
+
+            <div class="field-row field-full">
+                <label for="{{ form.description.id_for_label }}">Description</label>
+                {{ form.description }}
+                {% if form.description.errors %}{{ form.description.errors }}{% endif %}
+            </div>
+
+            <div class="field-row field-full">
+                <label>Attachments (optional)</label>
+                <input class="file-input" type="file" name="files" multiple>
+                <div class="help">You can select multiple files.</div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button class="btn btn-primary" type="submit">
+                {% if card %}Save{% else %}Create{% endif %}
+            </button>
+            <a class="btn btn-secondary" href="{% url 'board' %}">Cancel</a>
+        </div>
     </form>
+</div>
+{% endblock %}

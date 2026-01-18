@@ -1,11 +1,22 @@
 {% extends "base.html" %}
-{% block content %}
-<h1>First run setup</h1>
-<p>Admin login is: <b>admin</b></p>
 
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Set password</button>
-</form>
+{% block content %}
+<div class="auth-shell">
+    <div class="panel">
+        <h1 class="auth-title">First run setup</h1>
+        <p class="auth-subtitle">
+            Admin login is: <b>admin</b>. Set the password below.
+        </p>
+
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+
+            <div class="form-actions">
+                <button class="btn btn-primary" type="submit">Set password</button>
+                <a class="btn" href="{% url 'login' %}">← Back to login</a>
+            </div>
+        </form>
+    </div>
+</div>
 {% endblock %}

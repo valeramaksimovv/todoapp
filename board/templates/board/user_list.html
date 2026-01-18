@@ -1,51 +1,57 @@
-<!doctype html>
-<html>
+{% extends "base.html" %}
 
-<head>
-    <meta charset="utf-8">
-    <title>Users</title>
-</head>
+{% block content %}
+<div class="actions-bar">
+    <a class="btn" href="{% url 'board' %}">← Back to board</a>
+    <a class="btn btn-primary" href="{% url 'user_create' %}">+ Create user</a>
+</div>
 
-<body>
+<div class="panel">
     <h1>Users</h1>
+    <p>Only staff can manage users.</p>
 
+    <table class="table">
+        <thead>
+            <tr>
+                <th style="width: 70px;">ID</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th style="width: 90px;">Active</th>
+                <th style="width: 160px;">Action</th>
+            </tr>
+        </thead>
 
-    <!-- User Create Button -->
-    <p><a href="{% url 'user_create' %}">+ Create user</a></p>
+        <tbody>
+            {% for u in users %}
+            <tr>
+                <td>#{{ u.id }}</td>
+                <td>{{ u.username }}</td>
+                <td>{{ u.email|default:"—" }}</td>
+                <td>
+                    {% if u.is_active %}
+                    <span style="color: var(--success); font-weight: 650;">Yes</span>
+                    {% else %}
+                    <span style="color: var(--danger); font-weight: 650;">No</span>
+                    {% endif %}
+                </td>
 
-
-    <p><a href="{% url 'board' %}">← Back to board</a></p>
-
-    <table border="1" cellpadding="6">
-        <tr>
-            <th>ID</th>
-            <th>Username</th>
-            <th>Email</th>
-            <th>Active</th>
-            <th>Action</th>
-        </tr>
-
-        {% for u in users %}
-        <tr>
-            <td>{{ u.id }}</td>
-            <td>{{ u.username }}</td>
-            <td>{{ u.email }}</td>
-            <td>{% if u.is_active %}Yes{% else %}No{% endif %}</td>
-            <td>
-                {% if u.id != request.user.id %}
-                <form method="post" action="{% url 'user_toggle' u.id %}">
-                    {% csrf_token %}
-                    <button type="submit">
-                        {% if u.is_active %}Disable{% else %}Enable{% endif %}
-                    </button>
-                </form>
-                {% else %}
-                —
-                {% endif %}
-            </td>
-        </tr>
-        {% endfor %}
+                <td>
+                    {% if u.id != request.user.id %}
+                    <form method="post" action="{% url 'user_toggle' u.id %}">
+                        {% csrf_token %}
+                        {% if u.is_active %}
+                        <button class="btn btn-danger" type="submit">Disable</button>
+                        {% else %}
+                        <button class="btn btn-primary" type="submit">Enable</button>
+                        {% endif %}
+                    </form>
+                    {% else %}
+                    <span style="color: var(--muted-2);">—</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
     </table>
-</body>
-
-</html>
+</div>
+{% endblock %}

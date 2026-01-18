@@ -1,81 +1,139 @@
 {% extends "base.html" %}
 
 {% block content %}
-<p><a href="{% url 'board' %}"> ← Back to board </a></p>
+<div class="actions-bar">
+    <div class="actions-left">
+        <a class="btn btn-secondary" href="{% url 'board' %}">← Back to board</a>
+    </div>
+    <div class="actions-right">
+        <a class="btn btn-secondary" href="{% url 'card_edit' card.pk %}">Edit</a>
+    </div>
+</div>
 
-<h1>{{ card.name }}</h1>
+<div class="page-head">
+    <div>
+        <h1 class="page-title">#{{ card.id }} {{ card.name }}</h1>
+        <p class="page-subtitle">Card details, attachments and comments.</p>
+    </div>
+</div>
 
-<p>
-    <a href="{% url 'card_edit' card.pk %}">Edit</a> |
-    <a href="{% url 'board' %}">Back</a>
-</p>
+<div class="panel">
+    <div class="kv">
+        <div class="k">Status</div>
+        <div class="v">{{ card.get_status_display }}</div>
 
-<ul>
-    <li>Status: {{ card.get_status_display }}</li>
-    <li>Priority: {{ card.get_priority_display }}</li>
-    <li>Assignee: {{ card.assignee|default:"—" }}</li>
-    <li>Reporter: {{ card.reporter }}</li>
-    <li>Created: {{ card.created_at }}</li>
-    <li>Updated: {{ card.updated_at }}</li>
-</ul>
+        <div class="k">Priority</div>
+        <div class="v">{{ card.get_priority_display }}</div>
 
-<!-- Description block -->
+        <div class="k">Assignee</div>
+        <div class="v">{{ card.assignee|default:"—" }}</div>
 
-<h3>Description</h3>
-<p>{{ card.description|linebreaksbr|default:"No description" }}</p>
+        <div class="k">Reporter</div>
+        <div class="v">{{ card.reporter }}</div>
 
-<!-- Attachents block -->
+        <div class="k">Created</div>
+        <div class="v">{{ card.created_at }}</div>
 
-<h3>Attachments</h3>
+        <div class="k">Updated</div>
+        <div class="v">{{ card.updated_at }}</div>
+    </div>
 
-{% if attachments %}
-<ul>
-    {% for a in attachments %}
-    <li>
-        <a href="{{ a.file.url }}" target="_blank">{{ a.file.name }}</a>
-        — <small>{{ a.uploaded_by }} ({{ a.uploaded_at }})</small>
-    </li>
-    {% endfor %}
-</ul>
-{% else %}
-<p>No attachments yet.</p>
-{% endif %}
+    <hr>
 
-<!-- Upload files block -->
+    <h2>Description</h2>
+    {% if card.description %}
+    <p style="white-space: pre-wrap; color: var(--text); margin-top: 6px;">{{ card.description }}</p>
+    {% else %}
+    <p>No description.</p>
+    {% endif %}
+</div>
 
-<h4>Upload file</h4>
-<form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ attachment_form.as_p }}
-    <button type="submit" name="add_attachment">Upload</button>
-</form>
+<div style="height: 14px;"></div>
 
+<div class="panel">
+    <div class="page-head" style="margin-bottom: 10px;">
+        <div>
+            <h2 style="margin-bottom: 0;">Attachments</h2>
+            <p class="page-subtitle" style="margin-top: 6px;">Files uploaded to this card.</p>
+        </div>
+    </div>
 
-<!-- Comments block -->
+    {% if attachments %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>File</th>
+                <th>Uploaded by</th>
+                <th>Uploaded at</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for a in attachments %}
+            <tr>
+                <td>
+                    <a href="{{ a.file.url }}" target="_blank">{{ a.file.name }}</a>
+                </td>
+                <td>{{ a.uploaded_by }}</td>
+                <td>{{ a.uploaded_at }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No attachments yet.</p>
+    {% endif %}
 
-<h3>Comments</h3>
+    <hr>
 
-{% if comments %}
-<ul>
-    {% for c in comments %}
-    <li>
-        <b>{{ c.created_by }}</b>
-        <small>({{ c.created_at }})</small><br>
-        {{ c.text|linebreaksbr }}
-    </li>
-    {% endfor %}
-</ul>
-{% else %}
-<p>No comments yet.</p>
-{% endif %}
+    <h3 style="margin-bottom: 8px;">Upload file</h3>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="field-row">
+            {{ attachment_form.as_p }}
+        </div>
+        <div class="form-actions">
+            <button class="btn btn-primary" type="submit" name="add_attachment">Upload</button>
+        </div>
+    </form>
+</div>
 
-<!-- Add comments block -->
+<div style="height: 14px;"></div>
 
-<h4>Add comment</h4>
-<form method="post">
-    {% csrf_token %}
-    {{ comment_form.as_p }}
-    <button type="submit" name="add_comment">Add</button>
-</form>
+<div class="panel">
+    <div class="page-head" style="margin-bottom: 10px;">
+        <div>
+            <h2 style="margin-bottom: 0;">Comments</h2>
+            <p class="page-subtitle" style="margin-top: 6px;">Discussion history for this card.</p>
+        </div>
+    </div>
 
+    {% if comments %}
+    <div style="display:flex; flex-direction:column; gap: 12px;">
+        {% for c in comments %}
+        <div class="panel panel--compact" style="background: var(--surface-2);">
+            <div style="display:flex; justify-content:space-between; gap:10px; align-items:baseline;">
+                <div style="font-weight:700; color: var(--text);">{{ c.created_by }}</div>
+                <div style="font-size:12px; color: var(--muted-2);">{{ c.created_at }}</div>
+            </div>
+            <div style="margin-top: 8px; color: var(--text); white-space: pre-wrap;">{{ c.text }}</div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p>No comments yet.</p>
+    {% endif %}
+
+    <hr>
+
+    <h3 style="margin-bottom: 8px;">Add comment</h3>
+    <form method="post">
+        {% csrf_token %}
+        <div class="field-row">
+            {{ comment_form.as_p }}
+        </div>
+        <div class="form-actions">
+            <button class="btn btn-primary" type="submit" name="add_comment">Add</button>
+        </div>
+    </form>
+</div>
 {% endblock %}
